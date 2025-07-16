@@ -5,3 +5,4 @@ This repo contains code need to run Multivariate Distance Matrix Regression (MDM
 3. get started with get_data.R - this file contains data cleaning and MDMR analysis
 4. use dist.py to calculate functional connectivity matrix and distance matrix
 5. you'll notice that some lines of code goe sback and forth between Python and R. This occurs mostly for uploading and doanlaoding files outputted by both files. 
+**citation: this is an undergraduate thesis work.
