@@ -15,8 +15,12 @@ from CPAC.utils.typing import ConfigKeyType
 datadir = "/path/to/data"
 # remove subjects with less than 4 runs of fMRI
 all_subj = os.listdir(datadir)
-missing_ID = pd.read_csv('/path/to/missing/csv', header = None)
-missing_ID_flanker = pd.read_csv('/path/to/missing/flanker/data')
+missing_ID = pd.read_csv('/path/to/missing/csv', header = None) # get your list of IDs of missing data
+'''
+repeat below for all cognitive tests
+'''
+
+missing_ID_flanker = pd.read_csv('/path/to/missing/flanker/data') #** get the list of IDs of missing cognitive data from R
 
 missing_names_1 = missing_ID[missing_ID.columns[0]].drop_duplicates().to_numpy() 
     # 9 subjects without full imaging data 
@@ -31,7 +35,7 @@ matched_IDs = {re.search(pattern, name).group() for name in missing_names}
 flanker_subj = [
     subj for subj in all_subj 
     if re.search(pattern, subj).group() not in matched_IDs
-    ]
+    ] # create a list of subjects for flanker test
 
 
 '''
@@ -52,25 +56,25 @@ flanker_data = np.array([
     
 print(flanker_data.shape) # nsubj*nregion*ntimepoints
 
-def calc_subdists(flanker_data):
+def calc_subdists(flanker_data): # function to create distance matrix
     nsubs, nregions, _ = flanker_data.shape
-    D = np.zeros([nregions, nsubs, nsubs])
-    for i in range(nregions):
+    D = np.zeros([nregions, nsubs, nsubs]) # create an empty dataframe first
+    for i in range(nregions): # tehn plug in the numbers into the dataframe
         profiles = np.zeros((nsubs, nregions))
         for si in range(nsubs):
-            profiles[si] = correlation(flanker_data[si, i], flanker_data[si])
-        profiles = np.clip(np.nan_to_num(profiles), -0.9999, 0.9999)
-        profiles = np.arctanh(np.delete(profiles, i, 1))
-        D[i] = correlation(profiles, profiles)
+            profiles[si] = correlation(flanker_data[si, i], flanker_data[si]) # functional connectivity
+        profiles = np.clip(np.nan_to_num(profiles), -0.9999, 0.9999) # ensure it's bounded correctly
+        profiles = np.arctanh(np.delete(profiles, i, 1)) # transform
+        D[i] = correlation(profiles, profiles) # correlations to calculate distance from
 
-    D = np.sqrt(2.0 * (1.0 - D))
+    D = np.sqrt(2.0 * (1.0 - D)) # distance function
     return D
  
 D_flanker = calc_subdists(flanker_data)
 print(D_flanker.shape) # (400, 158, 158)
 
 #save
-np.save("D_flanker.npy", D_flanker)
+np.save("D_flanker.npy", D_flanker) #** use this .npy as Y in get_data.R
 
 
 '''
