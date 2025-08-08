@@ -28,35 +28,15 @@ demographics$interview_age <- demographics$interview_age/12 # age the age from m
 EP_demo<- filter(demographics, phenotype == 'Patient') # separate the file according to the phenotype
 HC_demo<-filter(demographics, phenotype=='Control')
 
-subj_non_miss_fMRI <- read.csv('/path/to/data', header = T) %>% # this is manually created in dist_flanker.py
+subj_non_miss_fMRI <- read.csv('/path/to/data', header = T) %>% # **this is manually created in dist.py
   as.data.frame()
-length(subj_non_miss_fMRI$X0)
+length(subj_non_miss_fMRI$X0) # check the numnber of missing data IDs
 
 age.stat <- t.test(EP_demo$interview_age, HC_demo$interview_age)
-# Welch Two Sample t-test
-#
-# data:  EP_demo$interview_age and HC_demo$interview_age
-# t = -2.353, df = 105.12, p-value = 0.02048
-# alternative hypothesis: true difference in means is not equal to 0
-# 95 percent confidence interval:
-#   -2.5330187 -0.2162982
-# sample estimates:
-#   mean of x mean of y
-# 23.06284  24.43750
 
 sex.stat <- chisq.test(table(demographics$phenotype, demographics$sex))
-# Pearson's Chi-squared test with Yates' continuity correction
-#
-# data:  table(demographics$phenotype, demographics$sex)
-# X-squared = 0.080373, df = 1, p-value = 0.7768
 
 race.stat <- chisq.test(table(demographics$phenotype, demographics$race))
-# Pearson's Chi-squared test
-#
-# data:  table(demographics$phenotype, demographics$race)
-# X-squared = 18.623, df = 6, p-value = 0.00485
-
-# demographics table in table.rmd
 
 # symptoms ----------------------------------------------------------------
 #load in the symptom sums file as a tibble
@@ -69,13 +49,7 @@ filter(src_subject_id %in% EP_demo$src_subject_id)
 # want to find the number of NA's for each column
 colSums(is.na(EP_symp)) # note different numbers of NA's for each column, even for the same test
 
-# for each test, want to remove rows with NA's (see but a multiuple imputation may be best - see Amelia)
-  # for partially observed NA's, using imputation an preserve information better than just stright up deleting rows with NA
-
-
-# then we want the columns to be summary scores
-
-
+# for each test, want to remove rows with NA's
 
 # flanker test ------------------------------------------------------------
 
@@ -119,7 +93,7 @@ flanker.bn.HC <- flanker.bn.HC[,-1] %>% # the remove the IDs
 
 ## MDMR --------------------------------------------------------------------
 
-D_flanker <-np$load('/D_flanker.npy')
+D_flanker <-np$load('/D_flanker.npy') #** load from outputs of dist.py
 # dim(D_flanker)
 
 # create an empty data frame of 400 by 4
@@ -158,7 +132,7 @@ for (i in 1:dim(D_flanker)[1]) {
 
 # extract score_pval
 # write.csv(df_flanker$score_pval,
-#           '/data/lavlab/students/fancat/get_data/stats_flanker.csv',
+#           'stats_flanker.csv',
 #           row.names = T)
 
 ### group-wise --------------------------------------------------------------
