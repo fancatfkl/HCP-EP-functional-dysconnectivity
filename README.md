@@ -7,7 +7,6 @@ This repo contains code need to run Multivariate Distance Matrix Regression (MDM
 5. use dist.py to calculate functional connectivity matrix and distance matrix;
 6. you'll notice that some lines of code goe sback and forth between Python and R. This occurs mostly for uploading and doanlaoding files outputted by both files. 
 
-> CSV files should be in the format: each row is a participant, each column is a variable with two column names (one is the varibale name, the other is a description of the column). For example, for particioant 1, column 1 = participant ID, column 2 = age, column 3 = NIH age-corrected score.
->
-> 
+CSV files should be in the format: each row is a participant, each column is a variable with two column names (one is the varibale name, the other is a description of the column). For example, for particioant 1, column 1 = participant ID, column 2 = age, column 3 = NIH age-corrected score.
+
 > **Citation**: This is an undergraduate thesis work so there's no publication associated, please cite this GitHub page or the published abstract: Fang, K., Danyluik, M., & Lavigne, K. M. (2025). Understanding Cognitive Impairment in Early Psychosis through Functional Brain Dysconnectivity: A Whole-Brain Voxel-wise Analysis Approach . McGill Science Undergraduate Research Journal, 20(2). https://doi.org/10.26443/msurj.v1i2.323.
