@@ -13,7 +13,7 @@ list_files_pheno #[1] "demographics.csv" "symptom_names.csv" "symptom_sums.csv" 
 
 # demographics ------------------------------------------------------------
 
-demographics <- read.csv('/path/to/data') %>%
+demographics <- read.csv('/path/to/demographics.csv') %>%
   as.tibble() # load demographics as a tibble instead of a data.frame
 
 demographics <- demographics %>%
@@ -28,7 +28,7 @@ demographics$interview_age <- demographics$interview_age/12 # age the age from m
 EP_demo<- filter(demographics, phenotype == 'Patient') # separate the file according to the phenotype
 HC_demo<-filter(demographics, phenotype=='Control')
 
-subj_non_miss_fMRI <- read.csv('/path/to/data', header = T) %>% # **this is manually created in dist.py
+subj_non_miss_fMRI <- read.csv('/path/to/subj_non_miss_fMRI.csv', header = T) %>%   # **this is manually created in dist.py**
   as.data.frame()
 length(subj_non_miss_fMRI$X0) # check the numnber of missing data IDs
 
@@ -40,7 +40,7 @@ race.stat <- chisq.test(table(demographics$phenotype, demographics$race))
 
 # symptoms ----------------------------------------------------------------
 #load in the symptom sums file as a tibble
-symp_sums <- read.csv('/path/to/data') %>%
+symp_sums <- read.csv('/path/to/symp_sums.csv') %>%
   tibble()
 
 EP_symp <- symp_sums %>% # subset the symp tibble to EP-only
@@ -74,26 +74,26 @@ flanker <- flanker %>%
 
 flanker_fMRI_miss <- subj_non_miss_fMRI %>%
   filter(!X0 %in% flanker$ID)
-print(flanker_fMRI_miss)
-# 13 subjects in the subj_non_miss that are not in flanker
+print(flanker_fMRI_miss) # 13 subjects in the subj_non_miss that are not in flanker
 
-write.csv(flanker_fMRI_miss, '/flanker_miss_ID.csv', row.names = F)
+write.csv(flanker_fMRI_miss, '/path/to/flanker_miss_ID.csv', row.names = F)
 # save the IDs as flanker_miss_ID.csv so that our python dictionary is updated
 
 flanker.bn.EP <- flanker %>%
   filter(ID %in% EP_demo$src_subject_id) # filter out the HC
 
-flanker.bn.EP <- flanker.bn.EP[,-1] # remove the ID column
-
-
 flanker.bn.HC <- flanker %>%
   filter(ID %in% HC_demo$src_subject_id) # filter out the EP
 
+write.csv(flanker.bn.EP$ID, '/path/to/flanker_EP_ID.csv',row.names = F)
+write.csv(flanker.bn.HC$ID, '/path/to/flanker_HC_ID.csv',row.names = F)
+
+flanker.bn.EP <- flanker.bn.EP[,-1] # remove the ID column
 flanker.bn.HC <- flanker.bn.HC[,-1] %>% # the remove the IDs
 
 ## MDMR --------------------------------------------------------------------
 
-D_flanker <-np$load('/D_flanker.npy') #** load from outputs of dist.py
+D_flanker <- np$load('/path/to/D_flanker.npy') # **load from outputs of dist.py**
 # dim(D_flanker)
 
 # create an empty data frame of 400 by 4
@@ -108,9 +108,9 @@ df_flanker <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
 # colnames(flanker) <- c('age', 'sex', 'score')
 # flanker <- model.matrix(~ score + age + sex, data = flanker)
 
-# run mdmr for the first region
-mdmr(X = flanker, D = D_flanker[1,,])
-# %>% summary()
+# run mdmr for the first region to test
+# mdmr(X = flanker, D = D_flanker[1,,])
+## %>% summary()
 
 row_index <- 1
 for (i in 1:dim(D_flanker)[1]) {
@@ -137,8 +137,8 @@ for (i in 1:dim(D_flanker)[1]) {
 
 ### group-wise --------------------------------------------------------------
 
-D_flanker_EP <-np$load('/D_flanker_EP.npy')
-D_flanker_HC <-np$load('/D_flanker_HC.npy')
+D_flanker_EP <- np$load('/D_flanker_EP.npy') # **load from outputs of dist.py**
+D_flanker_HC <- np$load('/D_flanker_HC.npy') # **load from outputs of dist.py**
 
 # create an empty data frame of 400 by 4
 n_rows <- 400
@@ -151,6 +151,7 @@ df_flanker_HC <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
   `colnames<-`(c('omibus_F', 'F_pval', 'score_F', 'score_pval'))
 
 # loop
+# EP
 row_index <- 1
 for (i in 1:dim(D_flanker_EP)[3]) {
   set.seed(12345) # to be reproducible
@@ -169,6 +170,7 @@ for (i in 1:dim(D_flanker_EP)[3]) {
   row_index <- row_index + 1
 }
 
+# HC
 row_index <- 1
 for (i in 1:dim(D_flanker_HC)[3]) {
   set.seed(12345)
@@ -210,25 +212,22 @@ lswmt <- lswmt %>%
 lswmt_fMRI_miss <- subj_non_miss_fMRI %>%
   filter(!X0 %in% lswmt $ID)
 print(lswmt_fMRI_miss) # 13 subjects missing
-write.csv(lswmt_fMRI_miss, '/lswmt_miss_ID.csv',row.names = F)
+write.csv(lswmt_fMRI_miss, '/path/to/lswmt_miss_ID.csv',row.names = F)
 
 lswmt.bn.EP <- lswmt %>%
   filter(ID %in% EP_demo$src_subject_id) # filter out the HC
-
 lswmt.bn.EP <- lswmt.bn.EP[,-1] # remove the ID column
 
 lswmt.bn.HC <- lswmt %>%
   filter(ID %in% HC_demo$src_subject_id) # filter out the EP
-
 lswmt.bn.HC <- lswmt.bn.HC[,-1] # the remove the IDs
 
-write.csv(lswmt.bn.EP$ID, '/lswmt_EP_ID.csv',row.names = F)
-write.csv(lswmt.bn.HC$ID, '/lswmt_HC_ID.csv',row.names = F)
-
+write.csv(lswmt.bn.EP$ID, '/path/to/lswmt_EP_ID.csv',row.names = F)
+write.csv(lswmt.bn.HC$ID, '/path/to/lswmt_HC_ID.csv',row.names = F)
 
 ## MDMR --------------------------------------------------------------------
 
-D_lswmt <- np$load('/D_lswmt.npy')
+D_lswmt <- np$load('/path/to/D_lswmt.npy') # **load from output of dist.py**
 
 # dim(D_lswmt) 400 by 158 by 158 due to the transpose in dist_lswmt.py
 
@@ -241,8 +240,8 @@ df_lswmt <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
 
 ### group-wise --------------------------------------------------------------
 
-D_lswmt_EP <- np$load('/D_lswmt_EP.npy')
-D_lswmt_HC <- np$load('/D_lswmt_HC.npy')
+D_lswmt_EP <- np$load('/path/to/D_lswmt_EP.npy') # **load from outputs of dist.py**
+D_lswmt_HC <- np$load('/path/to/D_lswmt_HC.npy') # **load from outputs of dist.py**
 
 # create an empty data frame of 400 by 4
 n_rows <- 400
@@ -254,8 +253,8 @@ df_lswmt_HC <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
   as.data.frame() %>%
   `colnames<-`(c('omibus_F', 'F_pval', 'score_F', 'score_pval'))
 
-
 # loop
+# EP
 row_index <- 1
 for (i in 1:dim(D_lswmt_EP)[3]) {
   set.seed(12345) # to be reproducible
@@ -274,6 +273,7 @@ for (i in 1:dim(D_lswmt_EP)[3]) {
   row_index <- row_index + 1
 }
 
+# HC
 row_index <- 1
 for (i in 1:dim(D_lswmt_HC)[3]) {
   set.seed(12345)
@@ -314,22 +314,22 @@ orrt_fMRI_miss <- subj_non_miss_fMRI %>%
   filter(!X0 %in% orrt$ID)
 
 print(orrt_fMRI_miss) # 13 subjects missing
-write.csv(orrt_fMRI_miss, '/orrt_miss_ID.csv',row.names = F)
+write.csv(orrt_fMRI_miss, '/path/to/orrt_miss_ID.csv',row.names = F)
 # save the IDs as miss_ID.csv so that our python dictionary is updated
 
 orrt.bn.EP <- orrt %>%
   filter(ID %in% EP_demo$src_subject_id) # use V10
-write.csv(orrt.bn.EP$ID, '/orrt_EP_ID.csv',row.names = F)
-orrt.bn.EP <- orrt.bn.EP[,-1]
+write.csv(orrt.bn.EP$ID, '/path/to/orrt_EP_ID.csv',row.names = F)
+orrt.bn.EP <- orrt.bn.EP[,-1] # remove ID column
 
 orrt.bn.HC <- orrt %>%
   filter(ID %in% HC_demo$src_subject_id) # use V10
-write.csv(orrt.bn.HC$ID, '/orrt_HC_ID.csv',row.names = F)
-orrt.bn.HC <- orrt.bn.HC[,-1]
+write.csv(orrt.bn.HC$ID, '/path/to/orrt_HC_ID.csv',row.names = F)
+orrt.bn.HC <- orrt.bn.HC[,-1] $ remove ID column
 
 ## MDMR --------------------------------------------------------------------
 
-D_orrt <-np$load('/D_orrt.npy')
+D_orrt <- np$load('/path/to/D_orrt.npy') # **load from output of dist.py**
 
 # dim(D_lswmt) 400 by 158 by 158 due to the transpose in dist_lswmt.py
 
@@ -342,8 +342,8 @@ df_orrt <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
 
 ### group-wise --------------------------------------------------------------
 
-D_orrt_EP <- np$load('/D_orrt_EP.npy')
-D_orrt_HC <- np$load('/D_orrt_HC.npy')
+D_orrt_EP <- np$load('/path/to/D_orrt_EP.npy') # **load from outputs of dist.py**
+D_orrt_HC <- np$load('/path/to/D_orrt_HC.npy') # **load from outputs of dist.py**
 
 # create an empty data frame of 400 by 4
 n_rows <- 400
@@ -355,8 +355,8 @@ df_orrt_HC <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
   as.data.frame() %>%
   `colnames<-`(c('omibus_F', 'F_pval', 'score_F', 'score_pval'))
 
-
 # loop
+# EP
 row_index <- 1
 for (i in 1:dim(D_orrt_EP)[3]) {
   set.seed(12345) # to be reproducible
@@ -375,6 +375,7 @@ for (i in 1:dim(D_orrt_EP)[3]) {
   row_index <- row_index + 1
 }
 
+# HC
 row_index <- 1
 for (i in 1:dim(D_orrt_HC)[3]) {
   set.seed(12345)
@@ -420,23 +421,23 @@ print(tpvt)
 tpvt_fMRI_miss <- subj_non_miss_fMRI %>%
   filter(!X0 %in% tpvt$ID)
 print(tpvt_fMRI_miss) # 13 subjects missing
-write.csv(tpvt_fMRI_miss, '/tpvt_miss_ID.csv',row.names = F)
+write.csv(tpvt_fMRI_miss, '/path/to/tpvt_miss_ID.csv',row.names = F)
 # save the IDs as miss_ID.csv so that our python dictionary is updated
 
 tpvt.bn.EP <- tpvt %>%
   filter(ID %in% EP_demo$src_subject_id)
-write.csv(tpvt.bn.EP$ID, '/tpvt_EP_ID.csv',row.names = F)
-tpvt.bn.EP <- tpvt.bn.EP[,-1]
+write.csv(tpvt.bn.EP$ID, '/path/to/tpvt_EP_ID.csv',row.names = F)
+tpvt.bn.EP <- tpvt.bn.EP[,-1] # remove ID column
 
 tpvt.bn.HC <- tpvt %>%
   filter(ID %in% HC_demo$src_subject_id)
-write.csv(tpvt.bn.HC$ID, '/tpvt_HC_ID.csv',row.names = F)
-tpvt.bn.HC <- tpvt.bn.HC[,-1]
+write.csv(tpvt.bn.HC$ID, '/path/to/tpvt_HC_ID.csv',row.names = F)
+tpvt.bn.HC <- tpvt.bn.HC[,-1] # remove ID column
 
 
 ## MDMR --------------------------------------------------------------------
 
-D_tpvt <-np$load('/D_tpvt.npy')
+D_tpvt <- np$load('/path/to/D_tpvt.npy') # **load from output of dist.py**
 
 # create an empty data frame of 400 by 4
 df_tpvt <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
@@ -445,8 +446,8 @@ df_tpvt <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
 
 ### group-wise --------------------------------------------------------------
 
-D_tpvt_EP <-np$load('/D_tpvt_EP.npy')
-D_tpvt_HC <-np$load('/D_tpvt_HC.npy')
+D_tpvt_EP <- np$load('/path/to/D_tpvt_EP.npy') # **load from outputs of dist.py**
+D_tpvt_HC <- np$load('/path/to/D_tpvt_HC.npy') # **load from outputs of dist.py**
 
 # create an empty data frame of 400 by 4
 
@@ -458,8 +459,8 @@ df_tpvt_HC <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
   as.data.frame() %>%
   `colnames<-`(c('omibus_F', 'F_pval', 'score_F', 'score_pval'))
 
-
 # loop
+# EP
 row_index <- 1
 for (i in 1:dim(D_tpvt_EP)[3]) {
   set.seed(12345) # to be reproducible
@@ -477,7 +478,7 @@ for (i in 1:dim(D_tpvt_EP)[3]) {
   df_tpvt_EP[row_index, 4] <- p_vals[2]
   row_index <- row_index + 1
 }
-
+# HC
 row_index <- 1
 for (i in 1:dim(D_tpvt_HC)[3]) {
   set.seed(12345)
@@ -523,22 +524,22 @@ pcps <-
 pcps_fMRI_miss <- subj_non_miss_fMRI %>%
   filter(!X0 %in% pcps$ID)
 print(pcps_fMRI_miss) # 14 subjects missing
-write.csv(pcps_fMRI_miss, '/pcps_miss_ID.csv',row.names = F)
+write.csv(pcps_fMRI_miss, '/path/to/pcps_miss_ID.csv',row.names = F)
 # save the IDs as miss_ID.csv so that our python dictionary is updated
 
 pcps.bn.EP <- pcps %>%
   filter(ID %in% EP_demo$src_subject_id)
-write.csv(pcps.bn.EP$ID, '/pcps_EP_ID.csv',row.names = F)
-pcps.bn.EP <- pcps.bn.EP[,-1]
+write.csv(pcps.bn.EP$ID, '/path/to/pcps_EP_ID.csv',row.names = F)
+pcps.bn.EP <- pcps.bn.EP[,-1] # remove ID column
 
 pcps.bn.HC <- pcps %>%
   filter(ID %in% HC_demo$src_subject_id)
-write.csv(pcps.bn.HC$ID, '/pcps_HC_ID.csv',row.names = F)
-pcps.bn.HC <- pcps.bn.HC[,-1]
+write.csv(pcps.bn.HC$ID, '/path/to/pcps_HC_ID.csv',row.names = F)
+pcps.bn.HC <- pcps.bn.HC[,-1] # remove ID column
 
 ## MDMR --------------------------------------------------------------------
 
-D_pcps <-np$load('/D_pcps.npy')
+D_pcps <- np$load('/path/to/D_pcps.npy') # **load from output of dist.py**
 
 # create an empty data frame of 400 by 4
 df_pcps <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
@@ -547,8 +548,8 @@ df_pcps <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
 
 ### group-wise --------------------------------------------------------------
 
-D_pcps_EP <-np$load('/D_pcps_EP.npy')
-D_pcps_HC <-np$load('/D_pcps_HC.npy')
+D_pcps_EP <- np$load('/path/to/D_pcps_EP.npy') # **load from outputs of dist.py**
+D_pcps_HC <- np$load('/path/to/D_pcps_HC.npy') # **load from outputs of dist.py**
 
 # create an empty data frame of 400 by 4
 
@@ -560,8 +561,8 @@ df_pcps_HC <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
   as.data.frame() %>%
   `colnames<-`(c('omibus_F', 'F_pval', 'score_F', 'score_pval'))
 
-
 # loop
+# EP
 row_index <- 1
 for (i in 1:dim(D_pcps_EP)[3]) {
   set.seed(12345) # to be reproducible
@@ -580,6 +581,7 @@ for (i in 1:dim(D_pcps_EP)[3]) {
   row_index <- row_index + 1
 }
 
+# HC
 row_index <- 1
 for (i in 1:dim(D_pcps_HC)[3]) {
   set.seed(12345)
@@ -626,22 +628,22 @@ psm <-
 psm_fMRI_miss <- subj_non_miss_fMRI %>%
   filter(!X0 %in% psm$ID)
 print(psm_fMRI_miss) # 13 subjects missing
-write.csv(psm_fMRI_miss, '/psm_miss_ID.csv',row.names = F)
+write.csv(psm_fMRI_miss, '/path/to/psm_miss_ID.csv',row.names = F)
 # save the IDs as miss_ID.csv so that our python dictionary is updated
 
 psm.bn.EP <- psm %>% # one less EP subject
   filter(ID %in% EP_demo$src_subject_id)
-write.csv(psm.bn.EP$V5, '/psm_EP_ID.csv',row.names = F)
-psm.bn.EP <- psm.bn.EP[,-1]
+write.csv(psm.bn.EP$V5, '/path/to/psm_EP_ID.csv',row.names = F)
+psm.bn.EP <- psm.bn.EP[,-1] # remove ID column
 
 psm.bn.HC <- psm %>%
   filter(ID %in% HC_demo$src_subject_id)
-write.csv(psm.bn.HC$V5, '/psm_HC_ID.csv',row.names = F)
-psm.bn.HC <- psm.bn.HC[,-1]
+write.csv(psm.bn.HC$V5, '/path/to/psm_HC_ID.csv',row.names = F)
+psm.bn.HC <- psm.bn.HC[,-1] # remove ID column
 
 ## MDMR --------------------------------------------------------------------
 
-D_psm <-np$load('/D_psm.npy')
+D_psm <- np$load('/path/to/D_psm.npy') # **load from outputs of dist.py**
 
 # create an empty data frame of 400 by 4
 df_psm <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
@@ -650,8 +652,8 @@ df_psm <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
 
 ### group-wise --------------------------------------------------------------
 
-D_psm_EP <- np$load('/D_psm_EP.npy')
-D_psm_HC <- np$load('/D_psm_HC.npy')
+D_psm_EP <- np$load('/path/to/D_psm_EP.npy') # **load from outputs of dist.py**
+D_psm_HC <- np$load('/path/to/D_psm_HC.npy') # **load from outputs of dist.py**
 
 # create an empty data frame of 400 by 4
 
@@ -663,8 +665,8 @@ df_psm_HC <- matrix(data = NA, nrow = n_rows, ncol = n_cols) %>%
   as.data.frame() %>%
   `colnames<-`(c('omibus_F', 'F_pval', 'score_F', 'score_pval'))
 
-
 # loop
+# EP
 row_index <- 1
 for (i in 1:dim(D_psm_EP)[3]) {
   set.seed(12345) # to be reproducible
@@ -683,6 +685,7 @@ for (i in 1:dim(D_psm_EP)[3]) {
   row_index <- row_index + 1
 }
 
+# HC
 row_index <- 1
 for (i in 1:dim(D_psm_HC)[3]) {
   set.seed(12345)
@@ -720,7 +723,7 @@ flanker <- model.matrix(~ score + age + sex, data = flanker)
 
 # optional - MDMR ----------------------------------------------------------------
 # import G (been converted to csv in Python)
-# Gower = read.csv('/data/lavlab/students/fancat/MDMR/Gower_test.csv', header = F)
+# Gower = read.csv('/path/to/Gower_test.csv', header = F)
 # View(Gower)
 # Gower <- as.matrix(Gower)
 
