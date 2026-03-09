@@ -1,4 +1,6 @@
 # install.packages('reticulate')
+# install.packages("MDMR")
+library(MDMR)
 library(reticulate) # read numpy files
 library(tidyverse)
 library(table1) # make tables
