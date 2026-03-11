@@ -1,9 +1,7 @@
 # HCP-EP-functional-dysconnectivity
-This repo contains code need to run Multivariate Distance Matrix Regression (MDMR) on fMRI data, using cognitive scores as covariate such as age and sex. This project simplifies the workflow of conducting MDMR by reusing the calc_subdists function from [CPAC/cwas/cwas.py](https://github.com/FCP-INDI/C-PAC/blob/main/CPAC/cwas/cwas.py) to calculate the distance matrix and the MDMR package [MDMR package](https://github.com/dmcartor/MDMR/) to conduct the regression using analytical p-values.
+Scripts to run Multivariate Distance Matrix Regression (MDMR) on fMRI data without needing permutation tests, using cognitive scores as covariate such as age and sex. This project simplifies the workflow of conducting MDMR by reusing the calc_subdists function from [CPAC/cwas/cwas.py](https://github.com/FCP-INDI/C-PAC/blob/main/CPAC/cwas/cwas.py) to calculate the distance matrix and the MDMR package [MDMR package](https://github.com/dmcartor/MDMR/) to conduct the regression using analytical p-values.
 
-MDMR for Connectome Wide Association Studies (CWAS) has been applied to rs-fMRI analysis by Shezad et al. (2014), https://doi.org/10.1016/j.neuroimage.2014.02.024 and Misaki et al. (2018), https://doi.org/10.1016/j.nicl.2018.08.025. Feola et al. (2024), https://doi.org/10.1038/s41380-024-02512-w and Ward et al. (2024), https://doi.org/10.1016/j.biopsych.2024.07.012 used this methods to analyse HCP-EP data.
-
-The mathematics behind MDMR is described in Zapala, & Schork (2012), https://doi.org/10.3389/fgene.2012.00190 and McArtor, Lubke, & Bergeman (2017), https://doi.org/10.1007/s11336-016-9527-8.
+MDMR for Connectome Wide Association Studies (CWAS) has been applied to rs-fMRI analysis by [Shezad et al. (2014)](https://doi.org/10.1016/j.neuroimage.2014.02.024) and [Misaki et al. (2018)](https://doi.org/10.1016/j.nicl.2018.08.025). [Feola et al. (2024)](https://doi.org/10.1038/s41380-024-02512-w ) and [Ward et al. (2024)](https://doi.org/10.1016/j.biopsych.2024.07.012) used this methods to analyse HCP-EP data. The mathematics behind MDMR is described in [Zapala, & Schork (2012)](https://doi.org/10.3389/fgene.2012.00190) and [McArtor, Lubke, & Bergeman (2017)](https://doi.org/10.1007/s11336-016-9527-8).
 ## Pre-requisites
 Python version 3.13.2, conda 4.12.0, RStudio.
 
@@ -42,7 +40,7 @@ To run the analysis,
 1. Create a python environment using Anaconda, e.g., `conda create -n cpac_env python=3.13.2 anaconda`. 
 2. Activate the environment, e.g., `module load anaconda | conda activate cpac_env`.
 3. Download C-PAC  https://github.com/FCP-INDI/C-PAC/tree/main/CPAC using `pip install cpac`and **keep the original folder name**.
-4. Download get_data.R and dist.py in seperate folders than C-PAC **in the same environment** cpac_env. For example, the project directory structure looks like this:
+4. Download get_data.R and dist.py in seperate folders than C-PAC **in the same environment** cpac_env. For example, the project directory tree may look like this:
 ```
 ├── get_data
 │   └── get_data.R
@@ -55,12 +53,19 @@ To run the analysis,
 │   ├── flanker_EP_ID.csv
 │   ├── flanker_HC_ID.csv
 │   ├── flanker_miss_ID.csv
-│   └──  subj_non_miss_fMRI.csv
+│   └── subj_non_miss_fMRI.csv
 ```
 5. Get started with get_data.R. This goes through data cleaning and MDMR analysis.
 6. Use dist.py to calculate functional connectivity matrix and distance matrix for the Flanker test. To run more than one cognitive tests, e.g., the Flanker test and the Oral Reading Recognition test, name the distance file "dist_flanker.py" ad "dist_orrt.py" and substitute corresponding test-specific information in the code.
 
 Note that some lines of code goes sback and forth between Python and R. This occurs mostly for uploading and downloading files outputted by both files. This is notified in the comments.
 
+### Extension
+Since MDMR results are non-directional, post-hoc seed-based analyses are needed to elucidate the spatial relationships between significant MDMR-identified regions and the whole brain (or the networks of interest). This has been described in [Feola et al. (2024)](https://doi.org/10.1038/s41380-024-02512-w ) and [Ward et al. (2024)](https://doi.org/10.1016/j.biopsych.2024.07.012) but this step is not included in this project.
+
+MDMR may be applied to analyse longitutional data. This is described in [Misaki et al. (2018)](https://doi.org/10.1016/j.nicl.2018.08.025) and can be tested using examples in [https://github.com/mamisaki/MDMR_fMRI](https://github.com/mamisaki/MDMR_fMRI).
+
+Moreover, MDMR has been applied to evauluate structual changes in Alzheimer's Disease in [Rasero et al. (2017](https://doi.org/10.1371/journal.pone.0187281)), and to account for manifold-value response variables in [Ryan et al. (2022)](https://doi.org/10.48550/arXiv.2202.05401).
+
 # Citation
-This is an undergraduate thesis work so there's no publication associated, please cite this GitHub page or the published abstract: Fang, K., Danyluik, M., & Lavigne, K. M. (2025). Understanding Cognitive Impairment in Early Psychosis through Functional Brain Dysconnectivity: A Whole-Brain Voxel-wise Analysis Approach . McGill Science Undergraduate Research Journal, 20(2). https://doi.org/10.26443/msurj.v1i2.323.
+This is an undergraduate thesis work so there's no publication associated. Please cite this GitHub page or the published abstract: Fang, K., Danyluik, M., & Lavigne, K. M. (2025). Understanding Cognitive Impairment in Early Psychosis through Functional Brain Dysconnectivity: A Whole-Brain Voxel-wise Analysis Approach . McGill Science Undergraduate Research Journal, 20(2). https://doi.org/10.26443/msurj.v1i2.323.
